@@ -5,6 +5,7 @@ resource "aws_security_group_rule" "bastion_internet" {
   protocol          = "tcp"
   # cidr_blocks       = ["0.0.0.0/0"]
   cidr_blocks       = [local.my_ip]
+  # which SG you are creating this rule
   security_group_id = local.bastion_sg_id
 }
 
@@ -35,6 +36,16 @@ resource "aws_security_group_rule" "mysql_bastion" {
   protocol          = "tcp"
   # Where traffic is coming from
   source_security_group_id = local.bastion_sg_id
+  security_group_id = local.mysql_sg_id
+}
+
+resource "aws_security_group_rule" "mysql_eks_node" {
+  type              = "ingress"
+  from_port         = 3306
+  to_port           = 3306
+  protocol          = "tcp"
+  # Where traffic is coming from
+  source_security_group_id = local.eks_node_sg_id
   security_group_id = local.mysql_sg_id
 }
 
@@ -102,8 +113,8 @@ resource "aws_security_group_rule" "eks_node_bastion" {
 
 resource "aws_security_group_rule" "eks_control_plane_eks_node" {
   type              = "ingress"
-  from_port         = 443
-  to_port           = 443
+  from_port         = 0
+  to_port           = 0
   protocol          = "-1" # all traffic
   # Where traffic is coming from
   source_security_group_id = local.eks_node_sg_id
